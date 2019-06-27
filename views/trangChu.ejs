@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Chat Node.js</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="jquery-3.4.1.min.js"></script>
+    <script>
+
+        
+
+        var socket = io("http://localhost");
+        socket.on("server_response_dky_thatbai", function(data){
+          alert("Username " + data + " đã tồn tại!");
+        });
+
+        socket.on("response_hide_dky_form", function(data){
+          $("#input_dky").hide(500);
+          var user = "<h3 class='username'> Xin chào: " + data + "</h3>";
+          $("#form_dky").delay(500).queue(function (next) {
+            $(this).append(user);
+            next();
+          });
+        });
+
+        socket.on("server_response_dky_thanhcong", function(data){
+          var user = "<div socketid='" + data.id + "' class='user'>" + data.username + "</div>";
+          $("#danhsachUsersOnline").append(user);
+        });
+
+        socket.on("list_user_online", function(data){
+          $.each( data, function( key, value ) {
+            var user = "<div class='user'>" + value + "</div>";
+            $("#danhsachUsersOnline").append(user);
+          });
+        });
+
+        socket.on("server_response_message", function(data){
+          var username = "<span class='hoten'>" + data.username + ": </span>";
+          var msg = "<span class='msg'>" + data.msg + "</span>";
+          $("#dsMsg").append(username + msg + "<div class='block' style='border-bottom: dotted 1px #416e8b; padding-bottom:5px'></div>");
+          
+          $(document).ready(function(){
+            $('#dsMsg').animate({
+                scrollTop: $('#dsMsg')[0].scrollHeight}, 1);
+          });
+        });
+
+        $(document).ready(function(){
+            $("#btnDangki").click(function(){
+              if($("#txtUser").val()==""){
+                alert("Xin vui lòng nhập username!");
+              }else{
+                socket.emit("client_request_username", $("#txtUser").val());
+              }
+            });
+
+            $("#btnChat").click(function(){
+              if($("#txtMessage").val()!=""){
+                socket.emit("client_send_message", $("#txtMessage").val());
+                $("#txtMessage").val("");
+                // //auto scroll new message
+                // $('#dsMsg').animate({
+                // scrollTop: $('#dsMsg')[0].scrollHeight}, 100);
+              }
+            });
+
+            //press enter input chat
+            $("#txtMessage").keypress(function(event){
+            var keycode = (event.keyCode ? event.keyCode : event.which);
+            if(keycode == '13'){
+              $("#btnChat").click();
+            }
+          });
+
+          // $('#dsMsg').animate({
+          //   scrollTop: $('#dsMsg').get(0).scrollHeight
+          // }, 2000);
+          
+          
+          
+        });
+        
+    </script>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
+    <style>
+    #toggle {
+      width: 100px;
+      height: 100px;
+      background: #ccc;
+    }
+    </style>
+    <script src="//code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+
+  </head>
+  <body>
+    <div id="wrapper">
+      <h1>DEMO CHAT SOCKET IO - NODEJS</h1>
+      <div id="form_dky">
+        <div id="input_dky">
+            <input type="text" id="txtUser" placeholder="Username" />
+            <input type="button" id="btnDangki" value="Đăng ký"  />
+        </div>
+      </div>
+      
+      <div class="block"></div>
+      <div id="left">
+        <div id="title">Users Online</div>
+        <div id="danhsachUsersOnline"></div>
+      </div>
+      <div id="right">
+        <div id="dsMsg"></div>
+        <div class="block"></div>
+        <input type="text" id="txtMessage" placeholder="Message..."/>
+        <input type="submit" id="btnChat" value="Chat"/>
+      </div>
+    </div>
+  </body>
+</html>
