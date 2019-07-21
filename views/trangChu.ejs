@@ -9,7 +9,7 @@
     <script src="jquery-3.4.1.min.js"></script>
     <script>        
 
-        var socket = io("http://localhost");
+        var socket = io("http://localhost:8080");
         socket.on("server_response_dky_thatbai", function(data){
           alert("Username " + data + " đã tồn tại!");
         });
